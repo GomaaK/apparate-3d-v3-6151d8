@@ -118,10 +118,11 @@ a.mat:hover{color:var(--magenta);border-color:var(--magenta)}
 @media (min-width:901px) and (hover:none){.hs-track{width:auto;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));padding-inline:var(--gut)}.stage{width:auto;min-height:0}.stage.intro{grid-column:1/-1}.stage .n{font-size:80px;margin-top:20px}.hs-prog{display:none}}
 
 /* opening animation (three.js) */
-.ld3d{position:relative;display:block;width:min(66vw,42vh,320px);height:min(66vw,42vh,320px);margin:0 auto 14px;opacity:0;transform:scale(.94);transition:opacity .7s ease,transform .9s cubic-bezier(.2,.7,.1,1);pointer-events:none}
-#loader.has3d .ld3d{opacity:1;transform:none}
+.ld3d{position:absolute;inset:0;width:100%;height:100%;display:block;opacity:0;transition:opacity .8s ease;pointer-events:none}
+#loader.has3d .ld3d{opacity:1}
 #loader>div{position:relative;z-index:1}
-#loader.has3d>div::before{content:"";position:absolute;left:50%;top:0;width:min(120vw,640px);height:min(100vw,520px);transform:translateX(-50%);background:radial-gradient(closest-side,rgba(226,25,139,.14),rgba(10,134,255,.07) 55%,rgba(14,14,18,0));z-index:-1;pointer-events:none}
+#loader.has3d .lbar{background:rgba(255,255,255,.22)}
+#loader.has3d .lt{color:#D8D8E0}
 #loader.has3d .lmark{animation:none}
 
 .checks a.chk{display:block;color:inherit;text-decoration:none;position:relative}.checks a.chk::after{content:"\2192";position:absolute;right:0;top:0;font-size:14px;opacity:.7;transition:transform .25s}.checks a.chk:hover{color:var(--magenta)}.checks a.chk:hover::after{transform:translateX(3px)}.checks a.chk:focus-visible{outline:2px solid var(--magenta);outline-offset:3px}
