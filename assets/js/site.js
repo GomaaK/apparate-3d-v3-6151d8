@@ -41,7 +41,7 @@ let introTweens = [];
     if (m) ready.push(new Promise(res => { const im = new Image(); im.onload = im.onerror = res; im.src = m[1]; if (im.decode) im.decode().then(res, res); }));
   }
   if (document.fonts && document.fonts.ready) ready.push(document.fonts.ready.catch(() => {}));
-  ready.push(new Promise(res => { if (window.__ld3d) return res(); document.addEventListener("ld3d", res, { once: true }); setTimeout(res, 1600); }));
+  ready.push(new Promise(res => { if (window.__ld3d) return res(); document.addEventListener("ld3d", res, { once: true }); setTimeout(res, 3500); }));
   Promise.all(ready).then(finish);
   setTimeout(finish, 3500);
 })();
