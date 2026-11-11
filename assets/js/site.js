@@ -1,4 +1,4 @@
-/* Apparate website — interactions. Content comes from the page (rendered from src/_data). */
+const TAGHREF = t => ({"100% cotton": "/apparate-3d-v3-6151d8/fabrics/", "Branding": "/apparate-3d-v3-6151d8/quality/", "Chest embroidery": "/apparate-3d-v3-6151d8/embroidery/", "DTF print": "/apparate-3d-v3-6151d8/printing/", "Embroidery": "/apparate-3d-v3-6151d8/embroidery/", "Fit": "/apparate-3d-v3-6151d8/quality/", "Flat seams": "/apparate-3d-v3-6151d8/quality/", "Heavy polyamide": "/apparate-3d-v3-6151d8/fabrics/", "Hem": "/apparate-3d-v3-6151d8/quality/", "Multi-color silk screen": "/apparate-3d-v3-6151d8/printing/", "Neck & shoulder seams": "/apparate-3d-v3-6151d8/quality/", "Printed artwork": "/apparate-3d-v3-6151d8/printing/", "Satin fabric": "/apparate-3d-v3-6151d8/fabrics/", "Silicone print": "/apparate-3d-v3-6151d8/printing/", "Sublimation": "/apparate-3d-v3-6151d8/printing/", "Sublimation printing": "/apparate-3d-v3-6151d8/printing/", "Two-sided printing": "/apparate-3d-v3-6151d8/printing/", "Vinyl reflective print": "/apparate-3d-v3-6151d8/printing/", "Waterproof fabric": "/apparate-3d-v3-6151d8/fabrics/", "YKK zipper": "/apparate-3d-v3-6151d8/fabrics/"}[t] || ""); /* Apparate website — interactions. Content comes from the page (rendered from src/_data). */
 (function () {
 "use strict";
 const $ = (s, c = document) => c.querySelector(s), $$ = (s, c = document) => Array.from(c.querySelectorAll(s));
@@ -30,7 +30,8 @@ let introTweens = [];
   const t = setInterval(() => { p = Math.min(92, p + Math.random() * 14); bar.style.width = p + "%"; pct.textContent = Math.round(p); }, 90);
   const finish = () => {
     if (done) return; done = true; clearInterval(t); bar.style.width = "100%"; pct.textContent = "100";
-    const wait = Math.max(0, 700 - (performance.now() - t0)); // never flash the loader
+    const mn = window.__ld3d ? (sessionStorage.getItem("apt-ld") ? 1300 : 2100) : 700; try { sessionStorage.setItem("apt-ld", "1"); } catch (e) {}
+    const wait = Math.max(0, mn - (performance.now() - t0)); // never flash the loader
     setTimeout(() => { toTop(); if (hasG) ScrollTrigger.refresh(); intro(); L.classList.add("done"); }, wait + 200);
   };
   const ready = [];
@@ -40,6 +41,7 @@ let introTweens = [];
     if (m) ready.push(new Promise(res => { const im = new Image(); im.onload = im.onerror = res; im.src = m[1]; if (im.decode) im.decode().then(res, res); }));
   }
   if (document.fonts && document.fonts.ready) ready.push(document.fonts.ready.catch(() => {}));
+  ready.push(new Promise(res => { if (window.__ld3d) return res(); document.addEventListener("ld3d", res, { once: true }); setTimeout(res, 1600); }));
   Promise.all(ready).then(finish);
   setTimeout(finish, 3500);
 })();
@@ -90,7 +92,7 @@ function showWork(i, j = 0) {
   $("#lbImg").src = src(w.images[j]); $("#lbImg").alt = w.brand + " " + w.product;
   $("#lbCat").textContent = catName(w.category); $("#lbTitle").textContent = w.product;
   $("#lbBy").textContent = w.brand + (w.via ? " · " + w.via : ""); $("#lbText").textContent = w.description;
-  $("#lbTags").innerHTML = (w.tags || []).map(t => `<span class="chip">${esc(t)}</span>`).join("");
+  $("#lbTags").innerHTML = (w.tags || []).map(t => (TAGHREF(t) ? `<a class="chip" href="${TAGHREF(t)}">${esc(t)}</a>` : `<span class="chip">${esc(t)}</span>`)).join("");
   $("#lbThumbs").innerHTML = w.images.length > 1 ? w.images.map((m, k) => `<button type="button" aria-label="Image ${k + 1}" aria-current="${k === j}" data-k="${k}"><img src="${esc(src(m))}" alt=""></button>`).join("") : "";
   const v = visibleIdx(); $("#lbCount").textContent = (v.indexOf(i) + 1) + " / " + v.length;
 }
@@ -225,7 +227,7 @@ $$(".track-bar").forEach(el => io3.observe(el));
 
 /* ---------- GSAP scroll scenes ---------- */
 if (!hasG || reduce) return;
-gsap.registerPlugin(ScrollTrigger);
+gsap.registerPlugin(ScrollTrigger); ScrollTrigger.config({ ignoreMobileResize: true });
 const exists = s => !!$(s);
 
 if (exists("#hero")) {
@@ -259,7 +261,7 @@ $$(".gbar").forEach(b => gsap.from(b, { scaleX: 0, transformOrigin: "0 50%", dur
 /* Images: fade in when decoded (no half-painted photos), then preload the rest in the background. */
 $$("main img").forEach(img => {
   if (img.complete && img.naturalWidth) return;
-  img.classList.add("im"); const done = () => { img.classList.add("ok"); refreshSoon(); };
+  img.classList.add("im"); const done = () => { img.classList.add("ok"); };
   img.addEventListener("load", done, { once: true }); img.addEventListener("error", done, { once: true });
 });
 let rT; function refreshSoon() { clearTimeout(rT); rT = setTimeout(() => ScrollTrigger.refresh(), 250); }
@@ -276,7 +278,7 @@ if (exists("#partners")) {
 }
 if (exists("#hsTrack")) {
   const mm = gsap.matchMedia();
-  mm.add("(min-width: 901px)", () => {
+  mm.add("(min-width: 901px) and (hover: hover)", () => {
     const track = $("#hsTrack"); const dist = () => Math.max(0, track.scrollWidth - innerWidth);
     const tw = gsap.to(track, { x: () => -dist(), ease: "none", scrollTrigger: { trigger: "#process", start: "top top", end: () => "+=" + dist(), pin: true, scrub: .6, invalidateOnRefresh: true, anticipatePin: 1, onUpdate: s => { $("#hsProg").style.width = (s.progress * 100) + "%"; } } });
     $$(".stage", track).forEach(st => gsap.from(st.querySelector(".n"), { yPercent: 40, opacity: 0, ease: "none", scrollTrigger: { trigger: st, containerAnimation: tw, start: "left 95%", end: "left 55%", scrub: true } }));
